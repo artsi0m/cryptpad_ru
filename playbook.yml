@@ -10,6 +10,7 @@
         name: autoconf--%2.69
         state: present
       become: yes
+      become_method: doas
 
     - name: install automake 1.16
       remote_user: root
@@ -17,6 +18,7 @@
         name: automake--%1.16
         state: present
       become: yes
+      become_method: doas
 
 
     - name: install git
@@ -25,6 +27,7 @@
         name: git
         state: present
       become: yes
+      become_method: doas
 
     - name: install node js intepreter
       remote_user: root
@@ -32,6 +35,7 @@
         name: node
         state: present
       become: yes
+      become_method: doas
 
     - name: Add the user cryptpad for building this service
       remote_user: root
@@ -41,6 +45,15 @@
           groups: wheel
           shell: /bin/ksh
       become: yes
+      become_method: doas
+
+    - name: install NGINX
+      remote_user: root
+      openbsd_pkg:
+        name: nginx
+        state: present
+      become: yes
+      become_method: doas
 
     - name: clone cryptpad repo
       remote_user: root
