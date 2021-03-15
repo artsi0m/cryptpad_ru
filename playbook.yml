@@ -10,7 +10,6 @@
         name: autoconf--%2.69
         state: present
       become: yes
-      become_method: doas
 
     - name: install automake 1.16
       remote_user: root
@@ -18,7 +17,6 @@
         name: automake--%1.16
         state: present
       become: yes
-      become_method: doas
 
 
     - name: install git
@@ -27,7 +25,6 @@
         name: git
         state: present
       become: yes
-      become_method: doas
 
     - name: install node js intepreter
       remote_user: root
@@ -35,41 +32,23 @@
         name: node
         state: present
       become: yes
-      become_method: doas
-
-    - name: Add the user cryptpad for building this service
-      remote_user: root
-      ansible.builtin.user:
-          name: cryptpad
-          comment: user for building and managing such service
-          groups: wheel
-          shell: /bin/ksh
-      become: yes
-      become_method: doas
-
-    - name: install NGINX
-      remote_user: root
-      openbsd_pkg:
-        name: nginx
-        state: present
-      become: yes
-      become_method: doas
-
     - name: clone cryptpad repo
       remote_user: root
       git:
           version: main
           repo: https://github.com/xwiki-labs/cryptpad
-          dest: /usr/home/cryptpad/cryptpad
+          dest: /usr/home/openbsd/cryptpad
       become: yes
-      become_method: doas
 
-    - name: chown cryptpad repo to cryptpad user
+    - name: copy cryptpad repository
       remote_user: root
-      file:
-          path: /usr/home/cryptpad/cryptpad
-          state: directory
-          recurse: yes
-          owner: cryptpad
+      copy:
+        src: /usr/home/openbsd/cryptpad
+        dest: /var/www/cryptpad
+        remote_src: yes
+        owner: www
+        group: daemon
+        mode: u=rwx,g=xr,o=x
       become: yes
-      become_method: doas
+
+# And then we copy config.js from master machine to /var/www
