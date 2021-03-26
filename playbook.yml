@@ -32,23 +32,69 @@
         name: node
         state: present
       become: yes
+
     - name: clone cryptpad repo
-      remote_user: root
+      remote_user: openbsd
       git:
           version: main
           repo: https://github.com/xwiki-labs/cryptpad
           dest: /usr/home/openbsd/cryptpad
+
+    - name: copy /var/www contents
+      remote_user: root
+      copy:
+        src: /var/www/
+        dest: /usr/home/openbsd/www/
+        remote_src: yes
+        owner: openbsd
+        mode: u=rwx,g=xr,o=x
       become: yes
 
     - name: copy cryptpad repository
       remote_user: root
       copy:
         src: /usr/home/openbsd/cryptpad
-        dest: /var/www/cryptpad
+        dest: /usr/home/openbsd/www/
         remote_src: yes
-        owner: www
-        group: daemon
+        owner: openbsd
         mode: u=rwx,g=xr,o=x
+        backup: yes
+      become: yes
+
+
+    - name: run npm install cryptpad
+      remote_user: openbsd
+      npm:
+        path: /usr/home/www/cryptpad/
+      become: yes
+
+    - name: run npm install bower
+      remote_user: openbsd
+      npm:
+        name: bower
+        path: /usr/home/www/cryptpad/
+      become: yes
+
+# Installing using dedicated module fails therefore i will use command
+    - name: run bower install
+      remote_user: openbsd
+      command: /home/openbsd/www/cryptpad/node_modules/.bin/bower install
+      become: yes
+      become_user: openbsd
+      args:
+        chdir: /usr/home/openbsd/www/cryptpad
+        creates: /home/openbsd/www/cryptpad/www/bower_components/
+        # creates: /var/www/cryptpad/www/bower_componets/jquery/bower.json
+
+    - name: copy service script
+      remote_user: root
+      copy:
+        src: cryptpad_daemon_script
+        dest: /etc/rc.d/cryptpad
+        owner: root
+        group: wheel
+        mode: u=r,g=rx,o=x
       become: yes
 
 # And then we copy config.js from master machine to /var/www
+#.......................................................................

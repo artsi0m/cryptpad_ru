@@ -1,0 +1,15 @@
+#!/bin/ksh
+
+daemon="/usr/local/bin/node"
+daemon_flags="server"
+daemon_user="openbsd"
+location="/usr/home/openbsd/www/cryptpad"
+
+. /etc/rc.d/rc.subr
+
+rc_start() {
+	${rcexec} "cd ${location}; ${daemon} ${daemon_flags}"
+}
+
+rc_bg=YES
+rc_cmd $1
